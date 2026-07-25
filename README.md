@@ -1,50 +1,48 @@
-# pt-lib
+# pt-lib — Chart Pattern Detection Library
 
-Python 图表形态检测库。基于 stock-pattern 框架，吸收 PatternPy / TradingPatternScanner 的形态，覆盖 **28 种形态**（含谐波），CLI + 回测 + 可视化全集成。
+<p align="center">
+  <img src="hero.png" alt="pt-lib hero" width="700">
+</p>
 
-> 名字致敬 TA-Lib —— pt-lib = Pattern Library.
+**pt-lib** is a Python chart pattern detection library built on the [stock-pattern](https://github.com/benny-thadikaran/stock-pattern) framework, and inspired by [PatternPy](https://github.com/khuyentran1401/PatternPy) / [TradingPatternScanner](https://github.com/khuyentran1401/TradingPatternScanner). It covers **28 pattern types** (including harmonics) with a unified CLI, backtesting, and visualization — all in one package.
+
+> The name pays homage to TA-Lib: **pt-lib** = **P**attern **T**rade **Lib**rary.
 
 ---
 
-## 形态总览
+## Features
 
-| 类别 | 形态 | 模式键 | 来源 |
-|------|------|--------|------|
+- **28 patterns** across 11 categories — H&S, Double T/B, VCP, Flag, Triangle, Trend Lines, Wedge, Channel, Multiple T/B, S/R, and 10 Harmonic patterns
+- **4 exclusive pattern families** not found in stock-pattern: Wedge, Channel, Multiple T/B, Horizontal S/R
+- **Pivot + geometric constraint** detection — more robust than rolling-window approaches
+- **CLI** with interactive mode, bulk scan, and grouped pattern scanning (all, bull, bear, bull_harm)
+- **Backtesting** engine with look-ahead/look-back periods
+- **Visualization** powered by mplfinance
+- **Production-quality** — inherited and extended from stock-pattern's well-tested pivot framework
+
+---
+
+## Pattern Overview
+
+| Category | Patterns | Key(s) | Origin |
+|----------|----------|--------|--------|
 | **H&S** | Head & Shoulders / Inverse H&S | `hnsd` / `hnsu` | stock-pattern |
-| **双顶/底** | Double Top / Double Bottom | `dtop` / `dbot` | stock-pattern |
+| **Double T/B** | Double Top / Double Bottom | `dtop` / `dbot` | stock-pattern |
 | **VCP** | Volatility Contraction (Bull/Bear) | `vcpu` / `vcpd` | stock-pattern |
-| **旗形** | Bullish / Bearish Flag | `flagu` / `flagd` | stock-pattern |
-| **三角形** | Symmetric / Ascending / Descending | `trng` | stock-pattern |
-| **趋势线** | Uptrend / Downtrend Line | `uptl` / `dntl` | stock-pattern |
-| **谐波** | AB=CD / Bat / Gartley / Crab / Butterfly | `abcdu`~`bflyd` (10个) | stock-pattern |
-| **楔形** ✨ | Falling Wedge (Bullish) / Rising Wedge (Bearish) | `wedgu` / `wedgd` | **pt-lib 新增** |
-| **通道** ✨ | Channel Up (Bullish) / Channel Down (Bearish) | `chnlu` / `chnld` | **pt-lib 新增** |
-| **多顶/底** ✨ | Multiple Top (Bearish) / Multiple Bottom (Bullish) | `mltp` / `mltb` | **pt-lib 新增** |
-| **S/R** ✨ | Horizontal Support & Resistance | `supr` | **pt-lib 新增** |
+| **Flag** | Bullish / Bearish Flag | `flagu` / `flagd` | stock-pattern |
+| **Triangle** | Symmetric / Ascending / Descending | `trng` | stock-pattern |
+| **Trend Line** | Uptrend / Downtrend Line | `uptl` / `dntl` | stock-pattern |
+| **Harmonic** | AB=CD / Bat / Gartley / Crab / Butterfly (Bull & Bear) | `abcdu` ~ `bflyd` (10 keys) | stock-pattern |
+| **Wedge** ✨ | Falling Wedge (Bullish) / Rising Wedge (Bearish) | `wedgu` / `wedgd` | **pt-lib** |
+| **Channel** ✨ | Channel Up (Bullish) / Channel Down (Bearish) | `chnlu` / `chnld` | **pt-lib** |
+| **Multiple T/B** ✨ | Multiple Top (Bearish) / Multiple Bottom (Bullish) | `mltp` / `mltb` | **pt-lib** |
+| **S/R** ✨ | Horizontal Support & Resistance | `supr` | **pt-lib** |
 
-✨ = PatternPy / TradingPatternScanner 有但 stock-pattern 没有，pt-lib 补齐的形态。
-
----
-
-## 开发过程
-
-1. 对比了 3 个 Python 图表形态识别库：
-
-   | 库 | 核心算法 | 代码量 | 质量 |
-   |---|---|---|---|
-   | **PatternPy / TradingPatternScanner** | rolling window 极值比较 | ~200行 | 虚警率高，原型级别 |
-   | **stock-pattern** | pivot + 几何约束 + Fib 比率 | ~3558行 | 生产可用级别 |
-   | **TA-Lib** | **CDL 函数全是K线形态**，无图表形态 | — | 不适用 |
-
-2. 选择 stock-pattern 作为基底，因其检测逻辑最严谨（pivot 点 + 趋势线 + 几何约束）
-
-3. 识别 stock-pattern 缺失的 4 个形态族（楔形/通道/多顶底/S/R），从 PatternPy 提取逻辑理念，但用 stock-pattern 的 pivot 框架**重新实现**（非简单搬运 rolling window）
-
-4. 全部集成到 CLI（`init.py`）、回测（`backtest.py`）、可视化（`Plotter.py`）
+> ✨ = New patterns added in pt-lib that were missing from stock-pattern.
 
 ---
 
-## 安装
+## Installation
 
 ```bash
 git clone https://github.com/tan-yang/pt-lib.git
@@ -52,47 +50,66 @@ cd pt-lib
 pip install -r requirements.txt
 ```
 
-首次运行需要配置数据路径：
+First-time setup — configure your data path:
 
 ```bash
 cd src
 python setup-config.py
 ```
 
+### Data Format
+
+Each symbol should have a CSV file in your `DATA_PATH` directory with columns: **Date, Open, High, Low, Close, Volume**. The file name (without extension) is used as the symbol key.
+
 ---
 
-## CLI 用法
+## CLI Usage
+
+All commands run from the `src/` directory.
+
+### Scan a Specific Pattern
 
 ```bash
-cd src
-
-# 扫描特定形态
 python init.py -p wedgu -f symlist.txt      # Falling Wedge
 python init.py -p chnlu -f symlist.txt       # Channel Up
 python init.py -p supr -f symlist.txt        # S/R Levels
-
-# 扫描分组
-python init.py -p all -f symlist.txt         # 全部经典形态
-python init.py -p bull -f symlist.txt        # 全部看涨形态
-python init.py -p bear -f symlist.txt        # 全部看跌形态
-python init.py -p bull_harm -f symlist.txt   # 全部看涨谐波
-
-# 交互模式（不传 -p）
-python init.py -f symlist.txt
-
-# 回测
-python backtest.py -p wedgu -d 2024-10-20 --period 60
-
-# 参数
--l/--left   左侧K线数（默认6）
--r/--right  右侧K线数（默认6）
---save      保存图表为PNG
---plot      从JSON结果重新绘图
 ```
 
-### symlist.txt 格式
+### Scan Pattern Groups
 
-每行一个股票代码，对应 `DATA_PATH` 下的 CSV 文件名（不含扩展名）：
+```bash
+python init.py -p all -f symlist.txt         # All classical patterns
+python init.py -p bull -f symlist.txt        # All bullish patterns
+python init.py -p bear -f symlist.txt        # All bearish patterns
+python init.py -p bull_harm -f symlist.txt   # All bullish harmonic patterns
+```
+
+### Interactive Mode
+
+Omit the `-p` flag to use an interactive prompt:
+
+```bash
+python init.py -f symlist.txt
+```
+
+### Backtesting
+
+```bash
+python backtest.py -p wedgu -d 2024-10-20 --period 60
+```
+
+### Common Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-l` / `--left` | Candles to the left of pivot | 6 |
+| `-r` / `--right` | Candles to the right of pivot | 6 |
+| `--save` | Save chart as PNG | — |
+| `--plot` | Re-plot from saved JSON results | — |
+
+### symlist.txt Format
+
+One symbol per line, matching your CSV file name (without extension):
 
 ```
 AAPL
@@ -112,40 +129,40 @@ from patterns_extended import find_bullish_wedge, find_support_resistance
 # OHLCV DataFrame
 df = pd.read_csv("data/AAPL.csv", index_col=0, parse_dates=True)
 
-# 提取 pivot 点
+# Extract pivot points
 pivots = get_max_min(df)
 
-# 检测 Falling Wedge
+# Detect Falling Wedge
 result = find_bullish_wedge("AAPL", df, pivots, {})
 if result:
     print(f"Detected: {result['pattern']} ({result['alt_name']})")
     print(f"Points: {result['points']}")
 
-# 检测 S/R 级别
+# Detect Support / Resistance
 sr = find_support_resistance("AAPL", df, pivots, {})
 if sr:
     print(f"{sr['alt_name']} at {sr['extra_points']['level_start'][1]:.2f}")
 ```
 
-### 返回格式
+### Return Format
 
-每个检测函数返回 `Optional[dict]`：
+Every detection function returns `Optional[dict]`:
 
 ```python
 {
-    "sym": "AAPL",          # 股票代码
-    "pattern": "WEDGU",     # 模式键
-    "alt_name": "Falling Wedge",  # 可读名称
-    "start": Timestamp(...),      # 形态起始日期
-    "end": Timestamp(...),        # 当前日期
-    "df_start": Timestamp(...),   # 数据起始
-    "df_end": Timestamp(...),     # 数据结束
-    "points": {                   # 标注点（用于标签）
+    "sym": "AAPL",                            # Symbol
+    "pattern": "WEDGU",                       # Pattern key
+    "alt_name": "Falling Wedge",              # Human-readable name
+    "start": Timestamp(...),                  # Pattern start date
+    "end": Timestamp(...),                    # Current date
+    "df_start": Timestamp(...),               # Data start
+    "df_end": Timestamp(...),                 # Data end
+    "points": {                               # Label points
         "A": (Timestamp, price),
         "B": (Timestamp, price),
         ...
     },
-    "extra_points": {             # 额外线（用于绘图）
+    "extra_points": {                         # Lines for plotting
         "upper_start": (Timestamp, price),
         "upper_end": (Timestamp, price),
         ...
@@ -155,42 +172,42 @@ if sr:
 
 ---
 
-## 新增形态检测逻辑
+## Extended Pattern Detection
 
-与 PatternPy 的 rolling window 极值比较不同，pt-lib 使用 **pivot + 趋势线几何约束**：
+Unlike the rolling-window extremum comparison used in PatternPy, pt-lib detects all 4 extended pattern families using **pivot points + geometric trend-line constraints**:
 
-| 形态 | 检测条件 |
-|------|----------|
-| **Falling Wedge** | 两个高点 + 两个低点均下行，上线斜率 < 下线斜率 → 收敛 |
-| **Rising Wedge** | 两个高点 + 两个低点均上行，上线斜率 < 下线斜率 → 收敛 |
-| **Channel Up** | 两个高点 + 两个低点均上行，斜率差 < 30% → 平行 |
-| **Channel Down** | 两个高点 + 两个低点均下行，斜率差 < 30% → 平行 |
-| **Multiple Top** | 3+ 高点在 5% 价格范围内聚类，价格未突破 |
-| **Multiple Bottom** | 3+ 低点在 5% 价格范围内聚类，价格未跌破 |
-| **S/R Levels** | pivot 点在自适应阈值内聚类，取最高 touch count 的级别 |
+| Pattern | Detection Logic |
+|---------|----------------|
+| **Falling Wedge** | 2 highs & 2 lows both descending; upper trend-line slope < lower slope → convergence |
+| **Rising Wedge** | 2 highs & 2 lows both ascending; upper trend-line slope < lower slope → convergence |
+| **Channel Up** | 2 highs & 2 lows both ascending; slope difference < 30% → parallel |
+| **Channel Down** | 2 highs & 2 lows both descending; slope difference < 30% → parallel |
+| **Multiple Top** | 3+ highs cluster within 5% price range; price has not broken out |
+| **Multiple Bottom** | 3+ lows cluster within 5% price range; price has not broken down |
+| **S/R Levels** | Pivot points cluster within adaptive thresholds; pick the level with the highest touch count |
 
-所有形态检查 close 是否已突破趋势线/级别（已突破的不输出）。
+All patterns check whether price has already broken through the trend-line or level — confirmed breakouts are excluded.
 
 ---
 
-## 项目结构
+## Project Structure
 
 ```
 pt-lib/
 ├── src/
-│   ├── init.py                 # CLI 入口
-│   ├── backtest.py             # 回测
-│   ├── utils.py                # 核心检测（stock-pattern 原版）
-│   ├── patterns_extended.py    # 新增形态（楔形/通道/多顶底/S/R）
-│   ├── Plotter.py              # mplfinance 可视化
-│   ├── setup-config.py         # 配置生成
-│   ├── loaders/                # 数据加载
+│   ├── init.py                 # CLI entry point
+│   ├── backtest.py             # Backtesting engine
+│   ├── utils.py                # Core detection (stock-pattern)
+│   ├── patterns_extended.py    # Extended patterns (Wedge, Channel, Multi T/B, S/R)
+│   ├── Plotter.py              # mplfinance visualization
+│   ├── setup-config.py         # Configuration setup
+│   ├── loaders/                # Data loaders
 │   │   ├── AbstractLoader.py
 │   │   ├── EODFileLoader.py
 │   │   └── IEODFileLoader.py
-│   └── user.json               # 用户配置
+│   └── user.json               # User config
 ├── tests/
-│   ├── test_extended_patterns.py  # 新增形态测试（10 tests）
+│   ├── test_extended_patterns.py  # 10 tests for extended patterns
 │   └── ...
 └── requirements.txt
 ```
@@ -199,4 +216,4 @@ pt-lib/
 
 ## License
 
-GNU General Public License v3.0 (继承自 stock-pattern)
+GNU General Public License v3.0 — inherited from [stock-pattern](https://github.com/benny-thadikaran/stock-pattern).
